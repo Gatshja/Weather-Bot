@@ -234,9 +234,9 @@ client.on('interactionCreate', async interaction => {
   }
 });
 
-const PORT = 9001;
+const PORT = 8080;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-client.login("MTM0MzE1MzcwNDE3MzU3MjA5Ng.GzcDS3.sQrM5o1VmOtkBogNYgzkh2wPZYh249wZ7v6IXU");
+client.login(DISCORD_BOT_TOKEN);
