@@ -2,6 +2,7 @@ const express = require('express');
 const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const axios = require('axios');
 const fs = require('fs');
+require('dotenv').config();
 
 const app = express();
 
@@ -55,7 +56,7 @@ const commands = [
     .setDescription('Get a list of available commands')
 ];
 
-const rest = new REST().setToken("MTM0MzE1MzcwNDE3MzU3MjA5Ng.GzcDS3.sQrM5o1VmOtkBogNYgzkh2wPZYh249wZ7v6IXU");
+const rest = new REST().setToken(DISCORD_BOT_TOKEN);
 (async () => {
   try {
     console.log('Started refreshing application (/) commands.');
@@ -234,7 +235,7 @@ client.on('interactionCreate', async interaction => {
   }
 });
 
-const PORT = 8080;
+const PORT = 9001;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
