@@ -56,7 +56,7 @@ const commands = [
     .setDescription('Get a list of available commands')
 ];
 
-const rest = new REST().setToken(DISCORD_BOT_TOKEN);
+const rest = new REST().setToken("MTM0MzE1MzcwNDE3MzU3MjA5Ng.GxDSPn.qjnxmwwH49G3a2q2uTefMWTm-jRmtcpiiFEUwc");
 (async () => {
   try {
     console.log('Started refreshing application (/) commands.');
