@@ -234,7 +234,7 @@ client.on('interactionCreate', async interaction => {
   }
 });
 
-const PORT = 6036;
+const PORT = 9001;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
