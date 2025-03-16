@@ -56,7 +56,7 @@ const commands = [
     .setDescription('Get a list of available commands')
 ];
 
-const rest = new REST().setToken("MTM0MzE1MzcwNDE3MzU3MjA5Ng.GxDSPn.qjnxmwwH49G3a2q2uTefMWTm-jRmtcpiiFEUwc");
+const rest = new REST().setToken(process.env.DISCORD_BOT_TOKEN);
 (async () => {
   try {
     console.log('Started refreshing application (/) commands.');
@@ -79,12 +79,12 @@ app.use((req, res, next) => {
   if (req.path === '/admin' || req.path.startsWith('/api/')) {
     return next();
   }
-  
+
   // Check if maintenance mode is enabled
   if (maintenanceConfig.enabled) {
     return res.sendFile(__dirname + '/public/maintenance.html');
   }
-  
+
   next();
 });
 
@@ -119,21 +119,21 @@ app.get('/api/maintenance', (req, res) => {
 app.post('/api/maintenance', express.json(), (req, res) => {
   try {
     console.log('Received maintenance update:', req.body);
-    
+
     if (req.body && typeof req.body.enabled !== 'undefined') {
       maintenanceConfig.enabled = req.body.enabled;
-      
+
       if (req.body.title) {
         maintenanceConfig.title = req.body.title;
       }
-      
+
       if (req.body.message) {
         maintenanceConfig.message = req.body.message;
       }
-      
+
       saveMaintenanceConfig();
       console.log('Updated maintenance config:', maintenanceConfig);
-      
+
       res.json({ 
         success: true,
         ...maintenanceConfig 
@@ -162,7 +162,7 @@ app.post('/api/restart-bot', (req, res) => {
 app.get('/api/weather/:city', async (req, res) => {
   try {
     const city = req.params.city;
-    const response = await axios.get(`http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=07ea72e9a847f12102e9d30f3b9b1a61&units=metric`);
+    const response = await axios.get(`http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${process.env.OPENWEATHER_API_KEY}&units=metric`);
     res.json(response.data);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch weather data' });
@@ -191,7 +191,7 @@ client.on('interactionCreate', async interaction => {
   if (interaction.commandName === 'weather') {
     const city = interaction.options.getString('city');
     try {
-      const response = await axios.get(`http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=07ea72e9a847f12102e9d30f3b9b1a61&units=metric`);
+      const response = await axios.get(`http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${process.env.OPENWEATHER_API_KEY}&units=metric`);
       const weather = response.data;
 
       const embed = new EmbedBuilder()
@@ -235,9 +235,9 @@ client.on('interactionCreate', async interaction => {
   }
 });
 
-const PORT = 9001;
+const PORT = 8080;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-client.login(DISCORD_BOT_TOKEN);
+client.login(process.env.DISCORD_BOT_TOKEN);

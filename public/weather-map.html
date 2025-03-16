@@ -17,6 +17,126 @@
       min-height: 100vh;
     }
 
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 5px;
+    }
+
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #2c3e50;
+    }
+
+    @media (max-width: 768px) {
+      .menu-toggle {
+        display: block;
+      }
+
+      .navbar {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 20px;
+      }
+
+      @media (max-width: 768px) {
+        body {
+          overflow-x: hidden;
+        }
+        
+        .nav-links {
+          position: fixed;
+          right: -250px;
+          top: 0;
+          height: 100vh;
+          width: 250px;
+          background: white;
+          flex-direction: column;
+          padding-top: 60px;
+          transition: transform 0.3s ease-in-out;
+          box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+          z-index: 1000;
+        }
+
+        .nav-links.active {
+          transform: translateX(-250px);
+        }
+      }
+
+      .nav-links a {
+        display: block;
+        padding: 15px;
+        text-align: center;
+        border-bottom: 1px solid #eee;
+        margin: 0;
+      }
+
+      .nav-links a:last-child {
+        border-bottom: none;
+      }
+
+      .nav-links.active {
+        display: flex;
+      }
+
+      .nav-links a {
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        width: 100%;
+        text-align: center;
+      }
+
+      .container {
+        padding: 10px;
+      }
+
+      .search-container {
+        padding: 10px;
+      }
+
+      .search-container input {
+        width: calc(100% - 24px);
+        margin: 8px 0;
+        padding: 12px;
+      }
+
+      .search-container button {
+        width: 100%;
+        margin: 8px 0;
+        padding: 15px;
+      }
+
+      #map {
+        height: 350px;
+        margin: 10px 0;
+        border-radius: 10px;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      #map {
+        height: 500px;
+      }
+    }
+
     .navbar {
       background: rgba(255, 255, 255, 0.9);
       padding: 1rem;
@@ -35,6 +155,42 @@
       gap: 20px;
     }
 
+    @media (max-width: 768px) {
+      .nav-links {
+        position: fixed;
+        right: -250px;
+        top: 0;
+        height: 100vh;
+        width: 250px;
+        background: white;
+        flex-direction: column;
+        padding-top: 60px;
+        transition: transform 0.3s ease-in-out;
+        box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+        z-index: 1000;
+      }
+
+      .nav-links.active {
+        transform: translateX(-250px);
+      }
+
+      .exit-menu {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #2c3e50;
+        display: none;
+      }
+
+      .nav-links.active .exit-menu {
+        display: block;
+      }
+    }
+
     .nav-links a {
       color: #2c3e50;
       text-decoration: none;
@@ -43,9 +199,29 @@
       transition: all 0.3s ease;
     }
 
-    .nav-links a:hover {
+    .nav-links a {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-links a::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: -100%;
+      width: 100%;
+      height: 100%;
       background: #5865F2;
+      transition: right 0.3s ease;
+      z-index: -1;
+    }
+
+    .nav-links a:hover {
       color: white;
+    }
+
+    .nav-links a:hover::before {
+      right: 0;
     }
 
     .container {
@@ -106,7 +282,7 @@
       border-radius: 5px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
-    
+
     .temperature-marker {
       display: flex !important;
       justify-content: center !important;
@@ -118,7 +294,9 @@
 <body>
   <nav class="navbar">
     <h2>Weather Bot</h2>
+    <button class="menu-toggle">☰</button>
     <div class="nav-links">
+      <button class="exit-menu">×</button>
       <a href="/">Home</a>
       <a href="/weather">Weather</a>
       <a href="/weather-map">Weather Map</a>
@@ -161,24 +339,29 @@
     let markers = [];
     const popularCities = [
       // Europe
-      "London", "Paris", "Berlin", "Madrid", "Rome", "Moscow", "Amsterdam", "Vienna", "Stockholm", "Athens", "Dublin", "Oslo", "Warsaw", "Prague", "Budapest", "Lisbon", "Copenhagen", "Brussels",
+      "London", "Paris", "Berlin", "Madrid", "Rome", "Moscow", "Amsterdam", "Vienna", "Stockholm", "Athens", "Dublin", "Oslo", "Warsaw", "Prague", "Budapest", "Lisbon", "Copenhagen", "Brussels", "Helsinki", "Bucharest", "Sofia", "Belgrade", "Zagreb", "Sarajevo", "Tirana", "Skopje", "Chisinau", "Minsk", "Kiev", "Riga", "Tallinn", "Vilnius",
       // North America
-      "New York", "Los Angeles", "Toronto", "Mexico City", "Chicago", "Vancouver", "Montreal", "Miami", "Dallas", "Seattle", "Boston", "Atlanta", "Denver", "Calgary", "Panama City", "Havana",
+      "New York", "Los Angeles", "Toronto", "Mexico City", "Chicago", "Vancouver", "Montreal", "Miami", "Dallas", "Seattle", "Boston", "Atlanta", "Denver", "Calgary", "Panama City", "Havana", "San Francisco", "Houston", "Phoenix", "Philadelphia", "San Diego", "Edmonton", "Quebec", "Winnipeg", "Guadalajara", "Monterrey", "Kingston", "Nassau",
       // Asia
-      "Tokyo", "Beijing", "Mumbai", "Dubai", "Seoul", "Bangkok", "Singapore", "Hong Kong", "Kuala Lumpur", "Jakarta", "Manila", "Hanoi", "Taipei", "Riyadh", "Doha", "Istanbul", "Jeddah", "Karachi", "Delhi", "Shanghai",
+      "Tokyo", "Beijing", "Mumbai", "Dubai", "Seoul", "Bangkok", "Singapore", "Hong Kong", "Kuala Lumpur", "Jakarta", "Manila", "Hanoi", "Taipei", "Riyadh", "Doha", "Istanbul", "Jeddah", "Karachi", "Delhi", "Shanghai", "Osaka", "Kyoto", "Busan", "Dhaka", "Colombo", "Kathmandu", "Thimphu", "Ulaanbaatar", "Vientiane", "Phnom Penh", "Yangon", "Ho Chi Minh City",
       // Africa
-      "Cairo", "Nairobi", "Lagos", "Johannesburg", "Addis Ababa", "Casablanca", "Cape Town", "Dakar", "Tunis", "Algiers", "Khartoum", "Dar es Salaam", "Accra",
+      "Cairo", "Nairobi", "Lagos", "Johannesburg", "Addis Ababa", "Casablanca", "Cape Town", "Dakar", "Tunis", "Algiers", "Khartoum", "Dar es Salaam", "Accra", "Luanda", "Maputo", "Harare", "Lusaka", "Windhoek", "Gaborone", "Antananarivo", "Kigali", "Bujumbura", "Mogadishu", "Djibouti", "Asmara", "Bamako", "Conakry", "Freetown",
       // South America
-      "Sao Paulo", "Buenos Aires", "Rio de Janeiro", "Lima", "Bogota", "Santiago", "Caracas", "Quito", "Salvador", "Montevideo",
+      "Sao Paulo", "Buenos Aires", "Rio de Janeiro", "Lima", "Bogota", "Santiago", "Caracas", "Quito", "Salvador", "Montevideo", "Asuncion", "La Paz", "Sucre", "Georgetown", "Paramaribo", "Cayenne", "Manaus", "Belem", "Recife", "Fortaleza", "Porto Alegre", "Cordoba", "Rosario", "Valparaiso",
       // Oceania
-      "Sydney", "Melbourne", "Auckland", "Brisbane", "Perth", "Wellington", "Christchurch", "Adelaide"
+      "Sydney", "Melbourne", "Auckland", "Brisbane", "Perth", "Wellington", "Christchurch", "Adelaide", "Canberra", "Hobart", "Darwin", "Gold Coast", "Suva", "Port Moresby", "Noumea", "Papeete", "Apia", "Nuku'alofa", "Port Vila"
     ];
 
     function initMap() {
-      map = L.map('map').setView([20, 0], 2);
+      map = L.map('map', {
+        worldCopyJump: true,
+        minZoom: 2,
+        maxBounds: [[-90, -180], [90, 180]]
+      }).setView([20, 0], 2);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        noWrap: true
       }).addTo(map);
 
       // Add OpenWeatherMap tile layer for global temperature visualization
@@ -187,9 +370,9 @@
         maxZoom: 19,
         opacity: 0.5
       });
-      
+
       // Don't add by default, let user toggle it
-      
+
       // Load popular cities on initial map load
       loadPopularCities();
 
@@ -216,14 +399,14 @@
     async function fetchCityWeather(city) {
       try {
         const response = await fetch(`/api/weather/${city}`);
-        
+
         if (!response.ok) {
           console.error(`Error fetching data for ${city}: ${response.statusText}`);
           return;
         }
-        
+
         const data = await response.json();
-        
+
         if (!data || !data.coord) {
           console.error(`Invalid weather data for ${city}`);
           return;
@@ -239,11 +422,11 @@
       const lat = data.coord.lat;
       const lon = data.coord.lon;
       const temp = Math.round(data.main.temp);
-      
+
       // Get temperature color
       let tempColor = '#00FFFF'; // Default color (cold)
       let textColor = '#000000';
-      
+
       if (temp > 30) {
         tempColor = '#FF0000'; // Very hot
         textColor = '#FFFFFF';
@@ -257,7 +440,7 @@
         tempColor = '#1E90FF'; // Cold
         textColor = '#FFFFFF';
       }
-      
+
       // Create custom icon with temperature color
       const customIcon = L.divIcon({
         className: 'temperature-marker',
@@ -265,11 +448,11 @@
         iconSize: [34, 20],
         iconAnchor: [17, 10]
       });
-      
+
       // Add marker to map
       const marker = L.marker([lat, lon], {icon: customIcon}).addTo(map);
       markers.push(marker);
-      
+
       // Add city name label
       const cityLabel = L.divIcon({
         className: 'city-label',
@@ -277,10 +460,10 @@
         iconSize: [80, 20],
         iconAnchor: [40, -5]
       });
-      
+
       const labelMarker = L.marker([lat, lon], {icon: cityLabel}).addTo(map);
       markers.push(labelMarker);
-      
+
       const popupContent = `
         <div class="weather-overlay">
           <h3>${cityName} (${data.weather[0].description})</h3>
@@ -299,20 +482,20 @@
         alert('Please enter a city name');
         return;
       }
-      
+
       try {
         console.log("Searching for city:", city);
-        
+
         // Use our backend API
         const response = await fetch(`/api/weather/${city}`);
-        
+
         if (!response.ok) {
           throw new Error('City not found or API error: ' + response.statusText);
         }
-        
+
         const data = await response.json();
         console.log("API success:", data);
-        
+
         if (!data || !data.coord) {
           throw new Error('Invalid weather data received');
         }
@@ -323,7 +506,7 @@
         console.log("Coordinates:", lat, lon);
 
         map.setView([lat, lon], 6);
-        
+
         // Display weather info
         document.getElementById('weatherResult').innerHTML = `
           <div class="weather-info">
@@ -351,21 +534,21 @@
       // Clear all markers
       markers.forEach(marker => map.removeLayer(marker));
       markers = [];
-      
+
       // Reload popular cities
       loadPopularCities();
-      
+
       // Clear search result
       document.getElementById('weatherResult').innerHTML = '';
     }
-    
+
     let tempLayer, cloudsLayer, windLayer;
-    
+
     function toggleLayers() {
       const showTemperature = document.getElementById('showTemperature').checked;
       const showClouds = document.getElementById('showClouds').checked;
       const showWind = document.getElementById('showWind').checked;
-      
+
       // Handle temperature city markers
       if (showTemperature) {
         refreshMap();
@@ -374,15 +557,15 @@
         markers.forEach(marker => map.removeLayer(marker));
         markers = [];
       }
-      
+
       // Handle global weather layers
       const apiKey = '07ea72e9a847f12102e9d30f3b9b1a61';
-      
+
       // Remove existing layers first
       if (tempLayer) map.removeLayer(tempLayer);
       if (cloudsLayer) map.removeLayer(cloudsLayer);
       if (windLayer) map.removeLayer(windLayer);
-      
+
       // Add selected layers
       if (showClouds) {
         cloudsLayer = L.tileLayer(`https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=${apiKey}`, {
@@ -390,7 +573,7 @@
           opacity: 0.5
         }).addTo(map);
       }
-      
+
       if (showWind) {
         windLayer = L.tileLayer(`https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=${apiKey}`, {
           maxZoom: 19,
@@ -398,9 +581,25 @@
         }).addTo(map);
       }
     }
-    
+
     // Initialize map when page loads
-    document.addEventListener('DOMContentLoaded', initMap);
+    document.addEventListener('DOMContentLoaded', () => {
+      initMap();
+
+      // Mobile menu toggle
+      const menuToggle = document.querySelector('.menu-toggle');
+      const navLinks = document.querySelector('.nav-links');
+
+      const exitMenu = document.querySelector('.exit-menu');
+      
+      menuToggle.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+      });
+
+      exitMenu.addEventListener('click', () => {
+        navLinks.classList.remove('active');
+      });
+    });
   </script>
 </body>
 </html>
