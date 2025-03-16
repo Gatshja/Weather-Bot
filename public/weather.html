@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Weather Information</title>
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #eef2f3 0%, #d9e4f5 100%);
+      min-height: 100vh;
+    }
+
+    .navbar {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 1rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: fadeIn 1s ease-out;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .nav-links a {
+      color: #2c3e50;
+      text-decoration: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      background: #5865F2;
+      color: white;
+    }
+
+    .container {
+      text-align: center;
+      padding: 50px 20px;
+      animation: fadeIn 1.5s ease-out;
+    }
+
+    input {
+      width: 60%;
+      padding: 12px;
+      margin: 5px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      width: 20%;
+      padding: 12px;
+      background: #5865F2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background: #4752c4;
+    }
+
+    .weather-info {
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      display: inline-block;
+      animation: fadeIn 1s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <h2>Weather Bot</h2>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/weather">Weather</a>
+      <a href="/weather-map">Weather Map</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h1>Check Weather</h1>
+    <input type="text" id="cityInput" placeholder="Enter city name">
+    <button onclick="getWeather()">Get Weather</button>
+    <button onclick="viewOnMap()" style="background: #22A699;">View on Map</button>
+    <div id="weatherResult"></div>
+  </div>
+
+  <script>
+    async function getWeather() {
+      const city = document.getElementById('cityInput').value;
+      try {
+        const response = await fetch(`/api/weather/${city}`);
+        const data = await response.json();
+        document.getElementById('weatherResult').innerHTML = `
+          <div class="weather-info">
+            <h3>Weather in ${city}</h3>
+            <h2>🌡 Temperature: ${Math.round(data.main.temp)}°C</h2>
+            <p>💧 Humidity: ${data.main.humidity}%</p>
+            <p>🌬 Wind Speed: ${data.wind.speed} m/s</p>
+            <p>${data.weather[0].description}</p>
+          </div>
+        `;
+      } catch (error) {
+        document.getElementById('weatherResult').innerHTML = 'Failed to fetch weather data';
+      }
+    }
+    
+    function viewOnMap() {
+      const city = document.getElementById('cityInput').value;
+      if (city) {
+        window.location.href = `/weather-map?city=${encodeURIComponent(city)}`;
+      } else {
+        alert('Please enter a city name first');
+      }
+    }
+  </script>
+</body>
+</html>

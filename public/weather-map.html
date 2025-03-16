@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Weather Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #eef2f3 0%, #d9e4f5 100%);
+      min-height: 100vh;
+    }
+
+    .navbar {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 1rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: fadeIn 1s ease-out;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .nav-links a {
+      color: #2c3e50;
+      text-decoration: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      background: #5865F2;
+      color: white;
+    }
+
+    .container {
+      text-align: center;
+      padding: 20px;
+      animation: fadeIn 1.5s ease-out;
+    }
+
+    .search-container {
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 60%;
+      padding: 12px;
+      margin: 5px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 12px 20px;
+      background: #5865F2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background: #4752c4;
+    }
+
+    #map {
+      height: 500px;
+      width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 1s ease-out;
+    }
+
+    .weather-info {
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      display: inline-block;
+      animation: fadeIn 1s ease-out;
+    }
+
+    .weather-overlay {
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    .temperature-marker {
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      z-index: 1000 !important;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <h2>Weather Bot</h2>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/weather">Weather</a>
+      <a href="/weather-map">Weather Map</a>
+    </div>
+  </nav>
+
+  <div class="container">
+      <h1>Weather Map</h1>
+      <div class="search-container">
+        <input type="text" id="cityInput" placeholder="Enter city name">
+        <button onclick="searchCity()">Search</button>
+        <button onclick="refreshMap()" style="background-color: #22A699;">Refresh Map</button>
+        <div style="margin-top: 10px;">
+          <label style="margin-right: 10px;">
+            <input type="checkbox" id="showTemperature" checked onchange="toggleLayers()"> Temperature
+          </label>
+          <label style="margin-right: 10px;">
+            <input type="checkbox" id="showClouds" onchange="toggleLayers()"> Clouds
+          </label>
+          <label style="margin-right: 10px;">
+            <input type="checkbox" id="showWind" onchange="toggleLayers()"> Wind speed
+          </label>
+        </div>
+      </div>
+      <div id="map"></div>
+      <div id="legend" style="background: white; padding: 10px; border-radius: 5px; margin-top: 10px; display: flex; justify-content: center; gap: 15px;">
+        <div><span style="display:inline-block; width:34px; height:20px; background:#FF0000; border-radius:4px; text-align:center; color:white; font-weight:bold; font-size:12px;">30°</span> >30°C</div>
+        <div><span style="display:inline-block; width:34px; height:20px; background:#FF8C00; border-radius:4px; text-align:center; font-weight:bold; font-size:12px;">27°</span> 25-30°C</div>
+        <div><span style="display:inline-block; width:34px; height:20px; background:#FFFF00; border-radius:4px; text-align:center; font-weight:bold; font-size:12px;">22°</span> 20-25°C</div>
+        <div><span style="display:inline-block; width:34px; height:20px; background:#00FF00; border-radius:4px; text-align:center; font-weight:bold; font-size:12px;">15°</span> 10-20°C</div>
+        <div><span style="display:inline-block; width:34px; height:20px; background:#1E90FF; border-radius:4px; text-align:center; color:white; font-weight:bold; font-size:12px;">5°</span> 0-10°C</div>
+        <div><span style="display:inline-block; width:34px; height:20px; background:#00FFFF; border-radius:4px; text-align:center; font-weight:bold; font-size:12px;">-5°</span> <0°C</div>
+      </div>
+      <div id="weatherResult"></div>
+    </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    let map;
+    let markers = [];
+    const popularCities = [
+      // Europe
+      "London", "Paris", "Berlin", "Madrid", "Rome", "Moscow", "Amsterdam", "Vienna", "Stockholm", "Athens", "Dublin", "Oslo", "Warsaw", "Prague", "Budapest", "Lisbon", "Copenhagen", "Brussels",
+      // North America
+      "New York", "Los Angeles", "Toronto", "Mexico City", "Chicago", "Vancouver", "Montreal", "Miami", "Dallas", "Seattle", "Boston", "Atlanta", "Denver", "Calgary", "Panama City", "Havana",
+      // Asia
+      "Tokyo", "Beijing", "Mumbai", "Dubai", "Seoul", "Bangkok", "Singapore", "Hong Kong", "Kuala Lumpur", "Jakarta", "Manila", "Hanoi", "Taipei", "Riyadh", "Doha", "Istanbul", "Jeddah", "Karachi", "Delhi", "Shanghai",
+      // Africa
+      "Cairo", "Nairobi", "Lagos", "Johannesburg", "Addis Ababa", "Casablanca", "Cape Town", "Dakar", "Tunis", "Algiers", "Khartoum", "Dar es Salaam", "Accra",
+      // South America
+      "Sao Paulo", "Buenos Aires", "Rio de Janeiro", "Lima", "Bogota", "Santiago", "Caracas", "Quito", "Salvador", "Montevideo",
+      // Oceania
+      "Sydney", "Melbourne", "Auckland", "Brisbane", "Perth", "Wellington", "Christchurch", "Adelaide"
+    ];
+
+    function initMap() {
+      map = L.map('map').setView([20, 0], 2);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      // Add OpenWeatherMap tile layer for global temperature visualization
+      const apiKey = '07ea72e9a847f12102e9d30f3b9b1a61';
+      const tempLayer = L.tileLayer(`https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=${apiKey}`, {
+        maxZoom: 19,
+        opacity: 0.5
+      });
+      
+      // Don't add by default, let user toggle it
+      
+      // Load popular cities on initial map load
+      loadPopularCities();
+
+      // Check for city parameter in URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const city = urlParams.get('city');
+
+      if (city) {
+        document.getElementById('cityInput').value = city;
+        searchCity();
+      }
+    }
+
+    async function loadPopularCities() {
+      try {
+        for (const city of popularCities) {
+          fetchCityWeather(city);
+        }
+      } catch (error) {
+        console.error("Error loading popular cities:", error);
+      }
+    }
+
+    async function fetchCityWeather(city) {
+      try {
+        const response = await fetch(`/api/weather/${city}`);
+        
+        if (!response.ok) {
+          console.error(`Error fetching data for ${city}: ${response.statusText}`);
+          return;
+        }
+        
+        const data = await response.json();
+        
+        if (!data || !data.coord) {
+          console.error(`Invalid weather data for ${city}`);
+          return;
+        }
+
+        addCityToMap(data, city);
+      } catch (error) {
+        console.error(`Error processing ${city}:`, error);
+      }
+    }
+
+    function addCityToMap(data, cityName) {
+      const lat = data.coord.lat;
+      const lon = data.coord.lon;
+      const temp = Math.round(data.main.temp);
+      
+      // Get temperature color
+      let tempColor = '#00FFFF'; // Default color (cold)
+      let textColor = '#000000';
+      
+      if (temp > 30) {
+        tempColor = '#FF0000'; // Very hot
+        textColor = '#FFFFFF';
+      } else if (temp >= 25) {
+        tempColor = '#FF8C00'; // Hot
+      } else if (temp >= 20) {
+        tempColor = '#FFFF00'; // Warm
+      } else if (temp >= 10) {
+        tempColor = '#00FF00'; // Cool
+      } else if (temp >= 0) {
+        tempColor = '#1E90FF'; // Cold
+        textColor = '#FFFFFF';
+      }
+      
+      // Create custom icon with temperature color
+      const customIcon = L.divIcon({
+        className: 'temperature-marker',
+        html: `<div style="width: 34px; height: 20px; display: flex; justify-content: center; align-items: center; background-color: ${tempColor}; color: ${textColor}; border-radius: 4px; border: 1px solid #666; font-weight: bold; font-size: 12px;">${temp}°</div>`,
+        iconSize: [34, 20],
+        iconAnchor: [17, 10]
+      });
+      
+      // Add marker to map
+      const marker = L.marker([lat, lon], {icon: customIcon}).addTo(map);
+      markers.push(marker);
+      
+      // Add city name label
+      const cityLabel = L.divIcon({
+        className: 'city-label',
+        html: `<div style="color: #333; font-weight: bold; font-size: 12px; white-space: nowrap;">${cityName}</div>`,
+        iconSize: [80, 20],
+        iconAnchor: [40, -5]
+      });
+      
+      const labelMarker = L.marker([lat, lon], {icon: cityLabel}).addTo(map);
+      markers.push(labelMarker);
+      
+      const popupContent = `
+        <div class="weather-overlay">
+          <h3>${cityName} (${data.weather[0].description})</h3>
+          <p>🌡 Temperature: ${temp}°C</p>
+          <p>💧 Humidity: ${data.main.humidity}%</p>
+          <p>🌬 Wind: ${data.wind.speed} m/s</p>
+        </div>
+      `;
+
+      marker.bindPopup(popupContent);
+    }
+
+    async function searchCity() {
+      const city = document.getElementById('cityInput').value;
+      if (!city) {
+        alert('Please enter a city name');
+        return;
+      }
+      
+      try {
+        console.log("Searching for city:", city);
+        
+        // Use our backend API
+        const response = await fetch(`/api/weather/${city}`);
+        
+        if (!response.ok) {
+          throw new Error('City not found or API error: ' + response.statusText);
+        }
+        
+        const data = await response.json();
+        console.log("API success:", data);
+        
+        if (!data || !data.coord) {
+          throw new Error('Invalid weather data received');
+        }
+
+        // Update map view
+        const lat = data.coord.lat;
+        const lon = data.coord.lon;
+        console.log("Coordinates:", lat, lon);
+
+        map.setView([lat, lon], 6);
+        
+        // Display weather info
+        document.getElementById('weatherResult').innerHTML = `
+          <div class="weather-info">
+            <h3>Weather in ${city}</h3>
+            <h2>🌡 Temperature: ${Math.round(data.main.temp)}°C</h2>
+            <p>💧 Humidity: ${data.main.humidity}%</p>
+            <p>🌬 Wind Speed: ${data.wind.speed} m/s</p>
+            <p>${data.weather[0].description}</p>
+          </div>
+        `;
+      } catch (error) {
+        console.error("Error fetching weather:", error);
+        document.getElementById('weatherResult').innerHTML = `
+          <div class="weather-info" style="color: #d9534f;">
+            <h3>Error</h3>
+            <p>Failed to fetch weather data for "${city}"</p>
+            <p>Please check the city name and try again</p>
+          </div>
+        `;
+        alert('Error: ' + error.message);
+      }
+    }
+
+    function refreshMap() {
+      // Clear all markers
+      markers.forEach(marker => map.removeLayer(marker));
+      markers = [];
+      
+      // Reload popular cities
+      loadPopularCities();
+      
+      // Clear search result
+      document.getElementById('weatherResult').innerHTML = '';
+    }
+    
+    let tempLayer, cloudsLayer, windLayer;
+    
+    function toggleLayers() {
+      const showTemperature = document.getElementById('showTemperature').checked;
+      const showClouds = document.getElementById('showClouds').checked;
+      const showWind = document.getElementById('showWind').checked;
+      
+      // Handle temperature city markers
+      if (showTemperature) {
+        refreshMap();
+      } else {
+        // Clear markers if temperature layer is disabled
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
+      }
+      
+      // Handle global weather layers
+      const apiKey = '07ea72e9a847f12102e9d30f3b9b1a61';
+      
+      // Remove existing layers first
+      if (tempLayer) map.removeLayer(tempLayer);
+      if (cloudsLayer) map.removeLayer(cloudsLayer);
+      if (windLayer) map.removeLayer(windLayer);
+      
+      // Add selected layers
+      if (showClouds) {
+        cloudsLayer = L.tileLayer(`https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=${apiKey}`, {
+          maxZoom: 19,
+          opacity: 0.5
+        }).addTo(map);
+      }
+      
+      if (showWind) {
+        windLayer = L.tileLayer(`https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=${apiKey}`, {
+          maxZoom: 19,
+          opacity: 0.5
+        }).addTo(map);
+      }
+    }
+    
+    // Initialize map when page loads
+    document.addEventListener('DOMContentLoaded', initMap);
+  </script>
+</body>
+</html>

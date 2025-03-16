@@ -1,0 +1,393 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Weather Bot Admin</title>
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #f0f2f5 0%, #e3e6ef 100%);
+      min-height: 100vh;
+    }
+
+    h1 {
+      color: #2c3e50;
+      text-align: center;
+      animation: fadeIn 1s ease-out;
+    }
+
+    .navbar {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 1rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: fadeIn 1s ease-out;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .nav-links a {
+      color: #2c3e50;
+      text-decoration: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      background: #5865F2;
+      color: white;
+    }
+
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      margin-top: 20px;
+      animation: fadeIn 1.5s ease-out;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .stat-card {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      border-left: 4px solid #5865F2;
+    }
+
+    .stat-number {
+      font-size: 28px;
+      font-weight: bold;
+      color: #5865F2;
+    }
+
+    .admin-section {
+      margin-top: 30px;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #5865F2;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
+    .action-btn {
+      background: #5865F2;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .action-btn.warning {
+      background: #e74c3c;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    input[type="text"], textarea, select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+
+    .status-green {
+      background-color: #2ecc71;
+    }
+
+    .status-red {
+      background-color: #e74c3c;
+    }
+    
+    .maintenance-preview {
+      background: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+    
+    .maintenance-preview h3 {
+      margin-top: 0;
+      color: #e74c3c;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <h2>Weather Bot</h2>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/weather">Weather</a>
+      <a href="/weather-map">Weather Map</a>
+    </div>
+  </nav>
+
+  <h1>Admin Dashboard</h1>
+
+  <div class="container">
+    <h2>System Overview</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>Users</h3>
+        <div class="stat-number">152</div>
+      </div>
+      <div class="stat-card">
+        <h3>API Calls</h3>
+        <div class="stat-number">2,341</div>
+      </div>
+      <div class="stat-card">
+        <h3>Bot Servers</h3>
+        <div class="stat-number">28</div>
+      </div>
+      <div class="stat-card">
+        <h3>Uptime</h3>
+        <div class="stat-number">99.8%</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container admin-section">
+    <h2>Maintenance Controls</h2>
+    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+      <div style="flex: 1;">
+        <h3>Maintenance Mode</h3>
+        <p>Enable maintenance mode to temporarily disable bot commands</p>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="maintenanceToggle">
+        <span class="slider"></span>
+      </label>
+    </div>
+    
+    <div class="form-group">
+      <label for="maintenanceTitle">Maintenance Title</label>
+      <input type="text" id="maintenanceTitle" value="Under Maintenance">
+    </div>
+    
+    <div class="form-group">
+      <label for="maintenanceMessage">Maintenance Message</label>
+      <textarea id="maintenanceMessage" rows="3">The Weather Bot is currently undergoing maintenance. Service will resume shortly.</textarea>
+    </div>
+    
+    <div class="maintenance-preview">
+      <h4>Preview of Maintenance Message</h4>
+      <div id="previewContainer">
+        <h3 id="previewTitle">Under Maintenance</h3>
+        <p id="previewMessage">The Weather Bot is currently undergoing maintenance. Service will resume shortly.</p>
+      </div>
+    </div>
+    
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+      <button class="action-btn" id="saveMaintenanceBtn">Save Settings</button>
+      <button class="action-btn warning" id="restartBotBtn">Restart Bot</button>
+    </div>
+  </div>
+
+  <div class="container admin-section">
+    <h2>Service Status</h2>
+    <div style="margin-bottom: 20px;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+          <span class="status-indicator status-green"></span> Discord Bot
+        </div>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+          <span class="status-indicator status-green"></span> Weather API
+        </div>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+          <span class="status-indicator status-green"></span> Web Dashboard
+        </div>
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+          <span class="status-indicator status-red"></span> Map Services
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Update preview as user types
+    document.getElementById('maintenanceTitle').addEventListener('input', function() {
+      document.getElementById('previewTitle').textContent = this.value;
+    });
+    
+    document.getElementById('maintenanceMessage').addEventListener('input', function() {
+      document.getElementById('previewMessage').textContent = this.value;
+    });
+    
+    document.getElementById('saveMaintenanceBtn').addEventListener('click', function() {
+      const isEnabled = document.getElementById('maintenanceToggle').checked;
+      const title = document.getElementById('maintenanceTitle').value;
+      const message = document.getElementById('maintenanceMessage').value;
+      
+      // Save to localStorage for demo purposes
+      // In a real app, this would be an API call to save server-side
+      localStorage.setItem('maintenanceMode', isEnabled);
+      localStorage.setItem('maintenanceTitle', title);
+      localStorage.setItem('maintenanceMessage', message);
+      
+      // Send to server API
+      fetch('/api/maintenance', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          enabled: isEnabled,
+          title: title,
+          message: message
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Maintenance settings saved!');
+        } else {
+          alert('Error saving settings: ' + data.error);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to save settings');
+      });
+    });
+    
+    document.getElementById('restartBotBtn').addEventListener('click', function() {
+      if (confirm('Are you sure you want to restart the bot?')) {
+        fetch('/api/restart-bot', {
+          method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Bot restart initiated!');
+          } else {
+            alert('Error restarting bot: ' + data.error);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Failed to restart bot');
+        });
+      }
+    });
+    
+    // Load saved settings
+    document.addEventListener('DOMContentLoaded', function() {
+      // For demo purposes - in a real app, fetch from server
+      const isEnabled = localStorage.getItem('maintenanceMode') === 'true';
+      const title = localStorage.getItem('maintenanceTitle') || 'Under Maintenance';
+      const message = localStorage.getItem('maintenanceMessage') || 'The Weather Bot is currently undergoing maintenance. Service will resume shortly.';
+      
+      document.getElementById('maintenanceToggle').checked = isEnabled;
+// Update server when toggle changes
+document.getElementById('maintenanceToggle').addEventListener('change', function() {
+  // Update preview to reflect current state
+  const isEnabled = this.checked;
+  document.getElementById('previewContainer').style.opacity = isEnabled ? '1' : '0.5';
+});
+      document.getElementById('maintenanceTitle').value = title;
+      document.getElementById('maintenanceMessage').value = message;
+      document.getElementById('previewTitle').textContent = title;
+      document.getElementById('previewMessage').textContent = message;
+      
+      // Fetch current settings from server
+      fetch('/api/maintenance')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById('maintenanceToggle').checked = data.enabled;
+            document.getElementById('maintenanceTitle').value = data.title;
+            document.getElementById('maintenanceMessage').value = data.message;
+            document.getElementById('previewTitle').textContent = data.title;
+            document.getElementById('previewMessage').textContent = data.message;
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching maintenance settings:', error);
+        });
+    });
+  </script>
+</body>
+</html>
